@@ -73,6 +73,20 @@ app.put('/usuarios/:correo',(req, res)=>{
 
 });
 
+app.delete('/usuarios/:correo',(req, res)=>{
+    const correo = req.params.correo;
+    const filtroUsuario = usuarios.filter(usuario => usuario.correo !== correo);
+    
+    if(filtroUsuario.length !== usuarios.length){
+        usuarios = filtroUsuario;
+        res.status(200).json({status:200,message:"Registro eliminado con exito..."});
+    }
+    else{
+        res.status(404).json({status:404,message:"No se encontraron registros..."});
+    }
+
+});
+
 app.listen(PORT, ()=>{
     console.log(`El servidor esta escuchando en http://localhost:${PORT}`);
 });
