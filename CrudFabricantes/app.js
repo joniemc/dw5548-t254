@@ -22,6 +22,11 @@ app.get('/fabricantes',(req,res)=>{
 
 app.post('/fabricantes',(req,res)=>{
     const fabricante = req.body;
+
+    if(!fabricante.nombre || fabricante.nombre ==="" || fabricante.nombre===null){
+        return res.status(400).json({status:400,message:"El nombre es obligatorio"});
+    }
+
     let fabricantes = obtenerFabricantes();
 
     fabricantes.push(fabricante);
