@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 const pool = mysql.createPool({
     host: 'localhost',
@@ -90,19 +90,32 @@ app.post('/categorias',async (req, res)=>{
 
 });
 
-app.put('/categorias/:id',(req, res)=>{
+app.put('/categorias/:id',async (req, res)=>{
     const categoria = req.body;
     categoria.Id = req.params.id;
 
     if(!categoria.Nombre || !categoria.Id){
         return res.status(400).json({status:400,message:"El Id y el Nombre son requeridos para la actualización..."});
     }
-
     const sql = 'UPDATE Categoria SET Nombre = ? WHERE Id= ?';
 
-    /*pool.query(sql, [categoria.Nombre, categoria.Id], (err, results)=>{
+    let nombreExiste = await validarCategoriaExistente(categoria.Nombre);
 
-    });*/
+    if (nombreExiste === 0) {
+        pool.query(sql, [categoria.Nombre, categoria.Id], (err, results) => {
+            if (err) {
+                res.status(500).json({ status: 500, message: 'Ocurrio un error en la consulta..' });
+            } else if (results.affectedRows === 0) {
+                res.status(404).json({ status: 404, message: 'Categoria no encontrada..' });
+            } else {
+                res.status(200).json({ status: 200, message: 'Registro actualizado con exito...', data: categoria });
+            }
+        });
+    }else if(nombreExiste === 1){
+        res.status(400).json({ status: 400, message: 'El nombre del registro que desea actualizar ya existe...' });
+    }else{
+        res.status(400).json({ status: 400, message: 'Ocurrio un error, intentelo mas tarde...' });
+    }
 });
 
 app.listen(PORT, ()=>{
